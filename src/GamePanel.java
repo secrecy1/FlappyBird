@@ -1,11 +1,14 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-public class GamePanel extends JPanel {
+public class GamePanel extends JPanel implements MouseListener,Runnable {
 
     BufferedImage zeroBufferedImage;
     BufferedImage oneBufferedImage;
@@ -33,6 +36,21 @@ public class GamePanel extends JPanel {
     BufferedImage yellowbirddownflapBufferedImage;
     BufferedImage yellowbirdmidflapBufferedImage;
     BufferedImage yellowbirdupflapBufferedImage;
+
+   private int width;
+   private int height;
+   private int baseImagex;
+   private int baseImagey;
+   private int baseImagex2;
+   private int x;
+   private int y;
+   private int centerx;
+   private int centery;
+
+    int yVelocity = 10;
+
+    boolean gameStarted = false;
+    private Thread gameThread;
     {
         try {
 
@@ -104,21 +122,98 @@ public class GamePanel extends JPanel {
 
     GamePanel()
     {
-
-        System.out.println(new ImageIcon("Sprites/background-day.png").getImage());
-        System.out.println(new ImageIcon("Sprites/background-day.png").getIconWidth());
         initPanel();
     }
     public void initPanel()
     {
-        setPreferredSize(new Dimension(dayBackGroundBufferedImage.getWidth() * 3/2,dayBackGroundBufferedImage.getHeight() * 3/2 + baseBufferedImage.getHeight() * 3/2));
+        width = dayBackGroundBufferedImage.getWidth() * 3/2;
+        height = dayBackGroundBufferedImage.getHeight() * 3/2;
+        x = (width / 2) - (yellowbirddownflapBufferedImage.getWidth() * 3 / 2) / 2;
+        y = height / 2;
+        baseImagex = 0;
+        centerx = (yellowbirdmidflapBufferedImage.getWidth() * 3 /2) /2;
+        centery = (yellowbirdmidflapBufferedImage.getHeight() * 3 /2) /2;
+        baseImagey = (dayBackGroundBufferedImage.getHeight() * 3 / 2) - (baseBufferedImage.getHeight() * 3 /2);
+        baseImagex2 = baseImagex+(baseBufferedImage.getWidth() * 3 /2);
+        setPreferredSize(new Dimension(width,height));
+        setFocusable(true); // Make the panel focusable
+        requestFocusInWindow();
+        addMouseListener(this);
+        gameThread = new Thread(this);
+        gameThread.start();
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+       drawBackground(g);
+        if(!gameStarted)
+        {
+            drawMessage(g);
+        }
+        if(gameStarted)
+        {
+            drawBird(g);
+
+        }
+    }
+    private void drawBird(Graphics g)
+    {
+        g.drawImage(yellowbirddownflapImage, x, y, null);
+    }
+    private void drawMessage(Graphics g)
+    {
+        g.drawImage(messageImage, (width - (messageBufferedImage.getWidth() * 3 / 2)) / 2, (messageBufferedImage.getHeight() * 3 / 2) / 3 - 2, null);
+    }
+    private void drawBackground(Graphics g)
+    {
         g.drawImage(dayBackGroundImage,0,0,null);
-        g.drawImage(baseImage,0,dayBackGroundBufferedImage.getHeight() * 3 / 2,null);
-       g.drawImage(yellowbirdmidflapImage,100,100,null);
+        g.drawImage(baseImage,baseImagex,baseImagey,null);
+        g.drawImage(baseImage,baseImagex2,baseImagey,null);
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        System.out.println("Mouse pressed");
+        gameStarted = true;
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
+    }
+
+    @Override
+    public void run() {
+        while(gameThread != null) {
+            baseImagex -=4;
+            baseImagex2 = baseImagex+(baseBufferedImage.getWidth() * 3 /2);
+
+            if(baseImagex2+(baseBufferedImage.getWidth() * 3 /2)<=width)
+               baseImagex = baseImagex2;
+            repaint();
+           // if(gameStarted)
+           //     y += yVelocity;
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
