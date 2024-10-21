@@ -9,7 +9,7 @@ public class GameFrame extends JFrame {
         pack();
         setTitle("Flappy Bird");
         setLocationRelativeTo(null);
-        //setResizable(false);
+        setResizable(true);
         setBackground(Color.black);
         setVisible(true);
     }
